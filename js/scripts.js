@@ -1,43 +1,43 @@
-// scripts.js
+document.getElementById('trigger').addEventListener('click', getQuote);
 
-"use strict";
+function getQuote(e){
+  e.preventDefault();
 
-$(document).ready(function() {
+  const quoteUrl = "https://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1";
+  const xhr = new XMLHttpRequest();
 
-  var prefix = "https://cors-anywhere.herokuapp.com/";
-  var tweetLink = "https://twitter.com/intent/tweet?text=";
-  var quoteUrl = "https://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1";
+  xhr.open('GET', quoteUrl + ((/\?/).test(this) ? "&" : "?") + (new Date()).getTime(), true);
+  xhr.onload = function(){
+    if(this.status == 200){
+      let quote = JSON.parse(this.responseText);
+      let output = `<h2 class="quote"> ${quote[0].content} </h2>
+                    <h3 class="author"> ${quote[0].title} </h3>`
+      document.getElementById('box').innerHTML = output;
 
-  function getQuote() {
-    $.getJSON(prefix + quoteUrl, createTweet);
-    $.ajaxSetup({ cache: false });
-  }
-
-  getQuote();
-  $('.trigger').click(function() {
-      getQuote();
-  });
-
-  function createTweet(input) {
-    var data = input[0];
-
-    var quoteText = $(data.content).text().trim();
-    var quoteAuthor = data.title;
-
-    if (!quoteAuthor.length) {
-        quoteAuthor = "Unknown author";
-    }
-
-    var tweetText = "Quote of the day - " + quoteText + " Author: " + quoteAuthor;
-
-    if (tweetText.length > 140) {
-      getQuote();
-    } else {
-      var tweet = tweetLink + encodeURIComponent(tweetText);
-      $('.quote').text(quoteText);
-      $('.author').text("Author: " + quoteAuthor);
-      $('.tweet').attr('href', tweet);
+      createTweet();
     }
   }
+  xhr.onerror = function(){
+    console.log('Request Error...');
+  }
+  xhr.send();
+}
 
-});
+function createTweet(){
+
+  let tweetLink = "https://twitter.com/intent/tweet?text=";
+  let author = document.getElementsByClassName('author')[0].innerText;
+  let quote = document.getElementsByClassName('quote')[0].children[0].innerText;
+
+  if (!author.length) {
+    author = "Unknown author";
+  }
+
+  const tweetText = `Quote of the day - ${quote} | Author: ${author}`;
+
+  if (tweetText > 240) {
+    getQuote();
+  }
+  let tweet = tweetLink + encodeURIComponent(tweetText);
+  document.querySelector('.tweet').setAttribute('href', tweet);
+}

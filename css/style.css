@@ -24,6 +24,10 @@ h2, h3 {
   margin-bottom: 40px;
 }
 
+.trigger {
+  cursor: pointer;
+}
+
 a {
   display: block;
   line-height: 40px;
